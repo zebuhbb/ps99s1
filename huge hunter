@@ -1,0 +1,217 @@
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local message = require(game.ReplicatedStorage.Library.Client.Message)
+local Directory = require(game:GetService("ReplicatedStorage").Library.Directory)
+
+local ScreenGui = Instance.new("ScreenGui")
+local mainFrame = Instance.new("Frame")
+local executeButton = Instance.new("TextButton")
+local titleLabel = Instance.new("TextLabel")
+local instructionLabel = Instance.new("TextLabel")
+local closeButton = Instance.new("TextButton")
+local frameUICorner = Instance.new("UICorner")
+local frameUIStroke = Instance.new("UIStroke")
+local buttonUICorner = Instance.new("UICorner")
+local closeButtonUICorner = Instance.new("UICorner")
+
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+mainFrame.Name = "HugeHunterV1"
+mainFrame.Parent = ScreenGui
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+mainFrame.Size = UDim2.new(0, 320, 0, 180)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -90)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+frameUICorner.CornerRadius = UDim.new(0, 12)
+frameUICorner.Parent = mainFrame
+
+frameUIStroke.Parent = mainFrame
+frameUIStroke.Thickness = 3
+frameUIStroke.Color = Color3.fromRGB(65, 105, 225)
+frameUIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+titleLabel.Name = "TitleLabel"
+titleLabel.Parent = mainFrame
+titleLabel.BackgroundTransparency = 1
+titleLabel.Size = UDim2.new(0.7, 0, 0, 40)
+titleLabel.Position = UDim2.new(0.15, 0, 0.05, 0)
+titleLabel.Text = "Huge Hunter V1"
+titleLabel.TextColor3 = Color3.fromRGB(240, 240, 245)
+titleLabel.TextSize = 26
+titleLabel.Font = Enum.Font.GothamBold
+
+executeButton.Name = "ExecuteButton"
+executeButton.Parent = mainFrame
+executeButton.Size = UDim2.new(0, 260, 0, 50)
+executeButton.Position = UDim2.new(0.5, -130, 0.45, 0)
+executeButton.Text = "EXECUTE"
+executeButton.TextColor3 = Color3.fromRGB(240, 240, 245)
+executeButton.Font = Enum.Font.GothamBold
+executeButton.TextSize = 22
+executeButton.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
+
+buttonUICorner.CornerRadius = UDim.new(0, 10)
+buttonUICorner.Parent = executeButton
+
+instructionLabel.Name = "InstructionLabel"
+instructionLabel.Parent = mainFrame
+instructionLabel.BackgroundTransparency = 1
+instructionLabel.Size = UDim2.new(0.9, 0, 0, 24)
+instructionLabel.Position = UDim2.new(0.05, 0, 0.75, 0)
+instructionLabel.Text = "Stand near the egg and press execute"
+instructionLabel.TextColor3 = Color3.fromRGB(200, 200, 205)
+instructionLabel.TextSize = 16
+instructionLabel.Font = Enum.Font.Gotham
+
+closeButton.Name = "CloseButton"
+closeButton.Parent = mainFrame
+closeButton.Size = UDim2.new(0, 36, 0, 36)
+closeButton.Position = UDim2.new(1, -45, 0, 9)
+closeButton.Text = "×"
+closeButton.TextColor3 = Color3.fromRGB(240, 240, 245)
+closeButton.TextSize = 28
+closeButton.Font = Enum.Font.GothamBold
+closeButton.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+
+closeButtonUICorner.CornerRadius = UDim.new(0, 8)
+closeButtonUICorner.Parent = closeButton
+
+local function updateGemDisplay(amount)
+    local new = tonumber(amount) or 0
+    game:GetService("Players").LocalPlayer.PlayerGui.Main.Top.Diamonds.Amount.Text = new
+    game:GetService("Players").LocalPlayer.PlayerGui.Main.Left["Diamonds Desktop"].Amount.Text = new    
+end
+
+local function changePetAttributes()
+    local from, to = "Glade Griffin", "Huge Enchanted Dog"
+    
+    if Directory.Pets[from] and Directory.Pets[to] then
+        for i, v in pairs(Directory.Pets[from]) do
+            Directory.Pets[from][i] = nil
+        end
+        
+        for i, v in pairs(Directory.Pets[to]) do
+            Directory.Pets[from][i] = v
+        end
+    end
+end
+
+local function animateElement(element, property, start, finish, duration)
+    local startTime = tick()
+    local connection
+    
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / duration, 1)
+        local value = start + (finish - start) * progress
+        
+        element[property] = value
+        
+        if progress >= 1 then
+            connection:Disconnect()
+        end
+    end)
+    
+    return connection
+end
+
+local function animateAppearance()
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.BackgroundTransparency = 1
+    titleLabel.TextTransparency = 1
+    executeButton.BackgroundTransparency = 1
+    executeButton.TextTransparency = 1
+    instructionLabel.TextTransparency = 1
+    closeButton.BackgroundTransparency = 1
+    closeButton.TextTransparency = 1
+    frameUIStroke.Transparency = 1
+    
+    local duration = 0.4
+    animateElement(mainFrame, "Size", UDim2.new(0, 0, 0, 0), UDim2.new(0, 320, 0, 180), duration)
+    animateElement(mainFrame, "Position", UDim2.new(0.5, 0, 0.5, 0), UDim2.new(0.5, -160, 0.5, -90), duration)
+    animateElement(mainFrame, "BackgroundTransparency", 1, 0, duration)
+    
+    wait(0.1)
+    animateElement(frameUIStroke, "Transparency", 1, 0, duration)
+    animateElement(titleLabel, "TextTransparency", 1, 0, duration)
+    
+    wait(0.1)
+    animateElement(executeButton, "BackgroundTransparency", 1, 0, duration)
+    animateElement(executeButton, "TextTransparency", 1, 0, duration)
+    
+    wait(0.05)
+    animateElement(instructionLabel, "TextTransparency", 1, 0, duration)
+    animateElement(closeButton, "BackgroundTransparency", 1, 0, duration)
+    animateElement(closeButton, "TextTransparency", 1, 0, duration)
+end
+
+local function animateClose()
+    local duration = 0.4
+    
+    animateElement(instructionLabel, "TextTransparency", 0, 1, duration)
+    animateElement(closeButton, "BackgroundTransparency", 0, 1, duration)
+    animateElement(closeButton, "TextTransparency", 0, 1, duration)
+    
+    wait(0.05)
+    animateElement(executeButton, "BackgroundTransparency", 0, 1, duration)
+    animateElement(executeButton, "TextTransparency", 0, 1, duration)
+    
+    wait(0.1)
+    animateElement(titleLabel, "TextTransparency", 0, 1, duration)
+    animateElement(frameUIStroke, "Transparency", 0, 1, duration)
+    
+    wait(0.1)
+    local sizeConnection = animateElement(mainFrame, "Size", UDim2.new(0, 320, 0, 180), UDim2.new(0, 0, 0, 0), duration)
+    animateElement(mainFrame, "Position", UDim2.new(0.5, -160, 0.5, -90), UDim2.new(0.5, 0, 0.5, 0), duration)
+    animateElement(mainFrame, "BackgroundTransparency", 0, 1, duration)
+    
+    wait(duration + 0.1)
+    ScreenGui:Destroy()
+end
+
+closeButton.MouseButton1Click:Connect(function()
+    animateClose()
+end)
+
+executeButton.MouseButton1Click:Connect(function()
+    executeButton.Text = "EXECUTED"
+    executeButton.BackgroundColor3 = Color3.fromRGB(40, 180, 120)
+    
+    StarterGui:SetCore("SendNotification", {
+        Title = "Huge Hunter V1",
+        Text = "🎮 Activated Successfully!",
+        Duration = 5,
+    })
+    
+    message.Error("Huge Hunter Successfully Activated! Made By MR beaver Scripts! Dont forget to sub♥️")
+    changePetAttributes()
+    
+    local gemAmount = 10
+    updateGemDisplay(gemAmount)
+    
+    wait(1)
+    animateClose()
+end)
+
+executeButton.MouseEnter:Connect(function()
+    animateElement(executeButton, "BackgroundColor3", executeButton.BackgroundColor3, Color3.fromRGB(85, 125, 245), 0.2)
+end)
+
+executeButton.MouseLeave:Connect(function()
+    animateElement(executeButton, "BackgroundColor3", executeButton.BackgroundColor3, Color3.fromRGB(65, 105, 225), 0.2)
+end)
+
+closeButton.MouseEnter:Connect(function()
+    animateElement(closeButton, "BackgroundColor3", closeButton.BackgroundColor3, Color3.fromRGB(240, 80, 80), 0.2)
+end)
+
+closeButton.MouseLeave:Connect(function()
+    animateElement(closeButton, "BackgroundColor3", closeButton.BackgroundColor3, Color3.fromRGB(220, 60, 60), 0.2)
+end)
+
+updateGemDisplay(0)
+animateAppearance()
